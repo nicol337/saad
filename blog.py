@@ -62,7 +62,7 @@ class HomePage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('home_page.html')
         self.response.write(template.render(template_values))
 
-class HomePage(webapp2.RequestHandler):
+class FirstClue(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
