@@ -8,7 +8,7 @@ handlers:
 - url: /bootstrap/css
   static_dir: bootstrap/css
 - url: /.*
-  script: blog.application
+  script: saad.application
 
 libraries:
 - name: webapp2
