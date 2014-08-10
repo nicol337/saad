@@ -80,6 +80,8 @@ class FirstClue(webapp2.RequestHandler):
             'url_linktext': url_linktext
         }   
     
+
+
         template = JINJA_ENVIRONMENT.get_template('first_clue.html')
         self.response.write(template.render(template_values))
 
@@ -432,7 +434,7 @@ class TagSearchPage(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', HomePage),
-    (r'/firstclue(.*)', FirstClue),
+    (r'/firstclue', FirstClue),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),
