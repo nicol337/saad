@@ -7,9 +7,11 @@ threadsafe: true
 handlers:
 - url: /bootstrap/css
   static_dir: bootstrap/css
-- url: /(.*\.(gif|png|jpg))
-  static_files: static/\1
-  upload: static/(.*\.(gif|png|jpg))
+# - url: /(.*\.(gif|png|jpg))
+#   static_files: static/\1 
+#   upload: static/(.*\.(gif|png|jpg))
+- url: /images
+  static_dir: images
 - url: /.*
   script: saad.application
 
