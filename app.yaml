@@ -12,6 +12,7 @@ handlers:
   upload: static/(.*\.(gif|png|jpg))
 - url: /images
   static_dir: images
+  mime_type: image/jpg
 - url: /.*
   script: saad.application
 
