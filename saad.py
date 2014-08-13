@@ -80,7 +80,7 @@ class Registration(webapp2.RequestHandler):
             'url_linktext': url_linktext
         }   
     
-        template = JINJA_ENVIRONMENT.get_template('registration.html')
+        template = JINJA_ENVIRONMENT.get_template('home_page.html')
         self.response.write(template.render(template_values))
 
 
