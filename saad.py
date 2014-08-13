@@ -456,7 +456,7 @@ class TagSearchPage(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', HomePage),
-    (r'/registration', Registration),
+    (r'/registration(.*)', Registration),
     (r'/firstclue/(.*)/', FirstClue),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
