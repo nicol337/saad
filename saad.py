@@ -62,6 +62,28 @@ class HomePage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('home_page.html')
         self.response.write(template.render(template_values))
 
+class Registration(webapp2.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+
+        if users.get_current_user():
+            url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        template_values = { 
+            'user' : user,
+            'url': url,
+            'url_linktext': url_linktext
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('registration.html')
+        self.response.write(template.render(template_values))
+
+
 class FirstClue(webapp2.RequestHandler):
 
     def get(self):
@@ -434,7 +456,8 @@ class TagSearchPage(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', HomePage),
-    (r'/firstclue', FirstClue),
+    (r'/registration', Registration),
+    (r'/firstclue/(.*)/', FirstClue),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),
