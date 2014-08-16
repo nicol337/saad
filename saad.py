@@ -37,6 +37,13 @@ def get_users_team_name(user):
 
     return team_name
 
+def get_users_team_members(user):
+    team_member_query = db.GqlQuery("SELECT * FROM TeamMember " +
+                                    "WHERE team_email = :1", user.email())
+    if (team_member_query.count() == 1) or (team_member_query.count() == 2):
+        team_members = team_member_query.run()
+        return team_members
+
 class Blog(db.Model):
     author = db.UserProperty(required=True)
     title = db.StringProperty(required=True)
@@ -74,11 +81,16 @@ class Team(db.Model):
 class TeamMember(db.Model):
     team_name = db.StringProperty(required=True)
     member_name = db.StringProperty(required=True)
+    team_email = db.StringProperty(required=True)
 
     def get_team_name(self):
         return self.team_name
 
+    def get_team_email(self):
+        return self.team_email
 
+    def get_member_name(self):
+        return self.member_name
 
 class HomePage(webapp2.RequestHandler):
 
@@ -91,17 +103,7 @@ class HomePage(webapp2.RequestHandler):
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
 
-            team_query = db.GqlQuery("SELECT * FROM Team " +
-                                    "WHERE team_email = :1", user.email())
-
-            team_results = team_query.run()
-            
-
-
-            if (team_query.count() == 1):
-                team_results = team_query.run(limit=1)
-                for team in team_results:
-                    team_name = team.get_team_name()
+            team_name = get_users_team_name(user)
 
         else:
             url = users.create_login_url(self.request.uri)
@@ -132,6 +134,8 @@ class Registration(webapp2.RequestHandler):
         message = ""
         new_team_name = self.request.get('team_name')
         new_team_email = self.request.get('team_email')
+        new_team_member1 = self.request.get('team_member1')
+        new_team_member2 = self.request.get('team_member2')
 
 
         existing_team_emails_query = db.GqlQuery("SELECT * FROM Team " +
@@ -154,9 +158,22 @@ class Registration(webapp2.RequestHandler):
                 message += "Team Name is already taken.\n"
                 can_register = False
 
+        if new_team_member1.isEmpty():
+            can_register = False
+            message += "Team Member 1 must not be blank"
+
         if (can_register):
             new_team = Team(team_name = new_team_name, team_email = new_team_email)
             new_team.put()
+            team_member1 = TeamMember(team_name = new_team_name, 
+                member_name = new_team_member1, team_email = new_team_email)
+            team_member1.put()
+
+            if team_member2:
+                team_member2 = TeamMember(team_name = new_team_name, 
+                    member_name = new_team_member2, team_email = new_team_email)
+                team_member2.put()
+
             message = "Successful registration!"
 
             template_values = { 
@@ -272,21 +289,26 @@ class TeamHome(webapp2.RequestHandler):
     def get(self, team_name):
         user = users.get_current_user()
         url_linktext = ""
+        team_members = {}
 
         if user:
             users_team_name = get_users_team_name(user)
             if users_team_name != team_name:
                 self.redirect('/')
             else:
+                url = users.create_logout_url(self.request.uri)
                 url_linktext = 'Logout'
+                team_members = get_users_team_members(user)
 
-        # else:
-
+        else:
+            self.redirect('/') 
 
         template_values = { 
             'user' : user,
+            'url': url,
             'url_linktext': url_linktext,
-            'team_name': team_name
+            'team_name': team_name,
+            'team_members': team_members
         }
        
         template = JINJA_ENVIRONMENT.get_template("team_home_page.html")

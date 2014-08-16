@@ -75,6 +75,9 @@
     <div class="span9">
       <div class="hero-unit">
         <h1>{{ team_name }}</h1>
+        {% for member in team_members %}
+          <h2>{{ member }}
+        {% endfor %}
     </div>
 </div><!--/.fluid-container-->
 
