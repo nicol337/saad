@@ -71,7 +71,7 @@ class HomePage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
 
-        team_name = "asdf"
+        team_name = ""
 
         if user:
             url = users.create_logout_url(self.request.uri)
@@ -81,9 +81,14 @@ class HomePage(webapp2.RequestHandler):
                                     "WHERE team_email = :1", user.email())
 
             team_results = team_query.run()
+            
+
+
 
             if (team_query.count() == 1):
-                team_name = team_results.get_team_name()
+                team_results = team_query.run(limit=1)
+                for team in team_results:
+                    team_name = team.get_team_name()
 
         else:
             url = users.create_login_url(self.request.uri)
