@@ -55,32 +55,28 @@
     </div>
        <div class="hero-unit" align="center">
           <h1>Saadiyat Games</h1> 
-
-           {% if user %}
           
-          <form action="/registration" method="post">
-            <div>
-              <textarea id="answer" name="answer" rows="1" cols="60"></textarea>
-            </div>
-            <div>
-              <input type="submit" value="Am I right?">
-            </div>
-          </form>
-          {$ else %}
+          {% if not user %}
           <h2>Register Your Team</h2>
+          <p>{{ error_msg }}</p>
            <p> Please enter the following information:</p>
             <form action="/registration" method="post">
                <div>
-              Team Name:<textarea id="teamname" name="teamname" rows="1" cols="60"></textarea>
-              Team Member #1:* <textarea id="teammember1" name="teammember1" rows="1" cols="60"></textarea>
-              Team Member #2: <textarea id="teammember2" name="teammember2" rows="1" cols="60"></textarea>
-              Team Email: * <textarea id="teammember1" name="teammember1" rows="1" cols="60"></textarea>
+              Team Name: <textarea id="team_name" name="team-name" rows="1" cols="60"></textarea>
+              <br>
+              Team Member #1:* <textarea id="team_member1" name="team_member1" rows="1" cols="60"></textarea>
+              <br>
+              Team Member #2: <textarea id="team_member2" name="team_member2" rows="1" cols="60"></textarea>
+              <br>
+              Team Email: * <textarea id="team_email" name="team_email" rows="1" cols="60"></textarea>
             </div>
             <div>
               <input type="submit" value="Game on.">
             </div>
             </form>
           <p>Already registered? Log in above</p>
+          {% else %}
+            <p>Log into your teams home page above</p>
           {% endif %} <!-- end of if user-->
       </div>
     </div>
