@@ -71,9 +71,20 @@ class HomePage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
 
-        if users.get_current_user():
+        team_name = "asdf"
+
+        if user:
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
+
+            team_query = db.GqlQuery("SELECT * FROM Team " +
+                                    "WHERE team_email = :1", user.email())
+
+            team_results = team_query.run()
+
+            if (team_query.count() == 1):
+                team_name = team_results.get_team_name()
+
         else:
             url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
@@ -81,7 +92,8 @@ class HomePage(webapp2.RequestHandler):
         template_values = { 
             'user' : user,
             'url': url,
-            'url_linktext': url_linktext
+            'url_linktext': url_linktext,
+            'team_name': team_name
         }   
     
         template = JINJA_ENVIRONMENT.get_template('home_page.html')
@@ -136,13 +148,9 @@ class Registration(webapp2.RequestHandler):
                 'team_email': new_team_email
             } 
 
-            # template = JINJA_ENVIRONMENT.get_template('team_home_page.html')
-            # self.response.write(template.render(template_values))
-            # self.redirect('/team/' + new_team_name)
-        
-    
-            template = JINJA_ENVIRONMENT.get_template('home_page.html')
+            template = JINJA_ENVIRONMENT.get_template('team_home_page.html')
             self.response.write(template.render(template_values))
+            self.redirect('/team/' + new_team_name)
 
         else:
             template_values = { 

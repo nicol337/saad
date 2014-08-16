@@ -40,7 +40,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               {% if user %}
-              <li><a href="/user/">Home</a></li>
+              <li><a href="/team/{{team_name}}">Home</a></li>
               <li><p class="navbar-text pull-right">Logged in as {{ user }}</p></li>
               <li><a href="{{ url|safe }}">{{ url_linktext }}</a></li>
               {% else %}
@@ -54,8 +54,12 @@
 
     </div>
        <div class="hero-unit" align="center">
-          <h1>Saadiyat Games</h1> 
-          <img src="http://saadiyatgames.com/images/invitation.jpg">
+          <h1>Saadiyat Games</h1>
+          {% if not user %} 
+          <h2><a href="/registration">Register</a></h2>
+          <h2>Already registered? Log in above</a></h2>
+          {% else %}
+          {% endif %}
       </div>
     </div>
 
