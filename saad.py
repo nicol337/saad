@@ -158,7 +158,7 @@ class Registration(webapp2.RequestHandler):
                 message += "Team Name is already taken.\n"
                 can_register = False
 
-        if new_team_member1.isEmpty():
+        if not new_team_member1:
             can_register = False
             message += "Team Member 1 must not be blank"
 
