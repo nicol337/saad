@@ -74,40 +74,7 @@
     </div><!--/span-->
     <div class="span9">
       <div class="hero-unit">
-        <h1>{{ blog_name }}</h1>
-        {% for blog in one_blog %}
-        <h1>{{ blog.title }}</h1>
-        {% endfor %}
-      </div>
-      {% if owner %}
-      <h2>New Post</h2>
-      <form action="/blog/{{blog_name}}/" method="post">
-          Title<div><textarea id="blogpost_title" name="blogpost_title" rows="1" cols="60"></textarea>
-          </div>
-          Content<div><textarea id="blogpost_content" name="blogpost_content" rows="5" cols="60"></textarea></div>
-          Tags (separated by commas) <div><textarea id="blogpost_tags" name="blogpost_tags" rows="1" cols="60"></textarea></div>
-          <div><input type="submit" value="post dat post"></div>
-      </form>
-      {% endif %}
-      <h2>Previous Posts</h2>
-      {% for blogpost in blogposts %}
-      <div class="span8">
-        <h3>{{blogpost.title}}</h3>
-        <h4>{{blogpost_content[blogpost.title]|safe}}</h4>
-        <h6>{{blogpost.date}}</h6>
-        <h6>tags |
-        {% for tag in blogpost.tags %}
-          <a href="/search/{{blog_name}}/{{tag}}/">{{tag}} </a>  
-        {% endfor %}
-        </h6>
-        <button type="button" class="btn btn-default"><a href="/post/{{blog_name}}/{{blogpost.title}}/view">view more</a></button>
-      </div>
-      {% endfor %}
-      {% if moreposts %}
-      <div class="span8">
-      <button type="button" class="btn btn-inverse pull-right"><a href="/blog/{{blog_name}}/{{ page_counter|int + 1 }}">older posts</a></button>
-      </div>
-      {% endif %}
+        <h1>{{ team_name }}</h1>
     </div>
 </div><!--/.fluid-container-->
 

@@ -23,6 +23,20 @@ def to_link(str):
         new_link = str
     return jinja2.Markup(new_link)
 
+def get_users_team_name(user):
+    team_query = db.GqlQuery("SELECT * FROM Team " +
+                                    "WHERE team_email = :1", user.email())
+    team_name = ""
+    
+    team_results = team_query.run()
+
+    if (team_query.count() == 1):
+        team_results = team_query.run(limit=1)
+        for team in team_results:
+            team_name = team.get_team_name()
+
+    return team_name
+
 class Blog(db.Model):
     author = db.UserProperty(required=True)
     title = db.StringProperty(required=True)
@@ -84,7 +98,6 @@ class HomePage(webapp2.RequestHandler):
             
 
 
-
             if (team_query.count() == 1):
                 team_results = team_query.run(limit=1)
                 for team in team_results:
@@ -116,7 +129,7 @@ class Registration(webapp2.RequestHandler):
             url_linktext = 'Login'
 
         user = users.get_current_user()
-        error_msg = ""
+        message = ""
         new_team_name = self.request.get('team_name')
         new_team_email = self.request.get('team_email')
 
@@ -133,36 +146,38 @@ class Registration(webapp2.RequestHandler):
 
         for email in existing_team_emails:
             if (email == new_team_email):
-                error_msg += "Email is already tied to an account.\n"
+                message += "Email is already tied to an account.\n"
                 can_register = False
         
         for name in existing_team_names:
             if (name == new_team_name):
-                error_msg += "Team Name is already taken.\n"
+                message += "Team Name is already taken.\n"
                 can_register = False
 
         if (can_register):
             new_team = Team(team_name = new_team_name, team_email = new_team_email)
             new_team.put()
+            message = "Successful registration!"
 
             template_values = { 
                 'user' : user,
                 'url': url,
                 'url_linktext': url_linktext,
+                'message': message,
                 'team_name': new_team_name,
-                'team_email': new_team_email
+                'team_email': new_team_email,
+                'registered': can_register
             } 
 
-            template = JINJA_ENVIRONMENT.get_template('team_home_page.html')
+            template = JINJA_ENVIRONMENT.get_template('registration.html')
             self.response.write(template.render(template_values))
-            self.redirect('/team/' + new_team_name)
 
         else:
             template_values = { 
                 'user' : user,
                 'url': url,
                 'url_linktext': url_linktext,
-                'error_msg': error_msg,
+                'message': message,
                 'team_name': new_team_name,
                 'team_email': new_team_email
             }   
@@ -254,20 +269,29 @@ class UserHome(webapp2.RequestHandler):
 # needs to be edited
 class TeamHome(webapp2.RequestHandler):
 
-    def post(self, blog_name, page_number):
-        user = users.get_current_user()
-
-
     def get(self, team_name):
-
         user = users.get_current_user()
+        url_linktext = ""
+
+        if user:
+            users_team_name = get_users_team_name(user)
+            if users_team_name != team_name:
+                self.redirect('/')
+            else:
+                url_linktext = 'Logout'
+
+        # else:
+
 
         template_values = { 
             'user' : user,
+            'url_linktext': url_linktext,
+            'team_name': team_name
         }
        
         template = JINJA_ENVIRONMENT.get_template("team_home_page.html")
         self.response.write(template.render(template_values))
+
 
 class BlogHome(webapp2.RequestHandler):
 

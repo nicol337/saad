@@ -40,7 +40,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               {% if user %}
-              <li><a href="/user/">Home</a></li>
+              <li><a href="/team/{{team_name}}">Home</a></li>
               <li><p class="navbar-text pull-right">Logged in as {{ user }}</p></li>
               <li><a href="{{ url|safe }}">{{ url_linktext }}</a></li>
               {% else %}
@@ -58,7 +58,8 @@
           
           {% if not user %}
           <h2>Register Your Team</h2>
-          <p>{{ error_msg }}</p>
+          <p>{{ message }}</p>
+          {% if not registered%}
            <p> Please enter the following information:</p>
             <form action="/registration" method="post">
                <div>
@@ -79,6 +80,7 @@
           <p>Already registered? Log in above</p>
           {% else %}
             <p>Log into your teams home page above</p>
+            {% endif %}
           {% endif %} <!-- end of if user-->
       </div>
     </div>
