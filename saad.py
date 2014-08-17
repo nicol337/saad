@@ -161,6 +161,10 @@ class Registration(webapp2.RequestHandler):
             can_register = False
             message += "Team Member 1 must not be blank"
 
+        if not new_team_email:
+            can_register = False
+            message += "Team Email must not be blank"
+
         if (can_register):
             new_team = Team(team_name = new_team_name, team_email = new_team_email)
             new_team.put()
@@ -335,7 +339,7 @@ class TeamHome(webapp2.RequestHandler):
             'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
-            'team_members_names': team_members_names
+            'team_member_names': team_member_names
         }
        
         template = JINJA_ENVIRONMENT.get_template("team_home_page.html")

@@ -75,9 +75,9 @@
     <div class="span9">
       <div class="hero-unit">
         <h1>{{ team_name }}</h1>
-        {% if team_members %}
-          {% for member in team_members %}
-            <h2>{{ member }}
+        {% if team_member_names %}
+          {% for name in team_member_names %}
+            <h2>{{ name }}
           {% endfor %}
         {% endif %}
     </div>
