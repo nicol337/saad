@@ -100,18 +100,18 @@ class HomePage(webapp2.RequestHandler):
         team_name = ""
 
         if user:
-            url = users.create_logout_url(self.request.uri)
+            log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
 
             team_name = get_users_team_name(user)
 
         else:
-            url = users.create_login_url(self.request.uri)
+            log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
         template_values = { 
             'user' : user,
-            'url': url,
+            'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name
         }   
@@ -124,10 +124,10 @@ class Registration(webapp2.RequestHandler):
     def post(self):
 
         if users.get_current_user():
-            url = users.create_logout_url(self.request.uri)
+            log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
-            url = users.create_login_url(self.request.uri)
+            log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
         user = users.get_current_user()
@@ -169,7 +169,7 @@ class Registration(webapp2.RequestHandler):
                 member_name = new_team_member1, team_email = new_team_email)
             team_member1.put()
 
-            if team_member2:
+            if new_team_member2:
                 team_member2 = TeamMember(team_name = new_team_name, 
                     member_name = new_team_member2, team_email = new_team_email)
                 team_member2.put()
@@ -178,7 +178,7 @@ class Registration(webapp2.RequestHandler):
 
             template_values = { 
                 'user' : user,
-                'url': url,
+                'url': log_in_out_url,
                 'url_linktext': url_linktext,
                 'message': message,
                 'team_name': new_team_name,
@@ -192,7 +192,7 @@ class Registration(webapp2.RequestHandler):
         else:
             template_values = { 
                 'user' : user,
-                'url': url,
+                'url': log_in_out_url,
                 'url_linktext': url_linktext,
                 'message': message,
                 'team_name': new_team_name,
@@ -208,15 +208,15 @@ class Registration(webapp2.RequestHandler):
         user = users.get_current_user()
 
         if users.get_current_user():
-            url = users.create_logout_url(self.request.uri)
+            log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
-            url = users.create_login_url(self.request.uri)
+            log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
         template_values = { 
             'user' : user,
-            'url': url,
+            'url': log_in_out_url,
             'url_linktext': url_linktext
         }   
     
@@ -226,23 +226,41 @@ class Registration(webapp2.RequestHandler):
 
 class FirstClue(webapp2.RequestHandler):
 
-    def get(self):
+    def post(self):
         user = users.get_current_user()
 
         if users.get_current_user():
-            url = users.create_logout_url(self.request.uri)
+            log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
-            url = users.create_login_url(self.request.uri)
+            log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
         template_values = { 
             'user' : user,
-            'url': url,
+            'url': log_in_out_url,
             'url_linktext': url_linktext
         }   
     
+        template = JINJA_ENVIRONMENT.get_template('first_clue.html')
+        self.response.write(template.render(template_values))
 
+    def get(self):
+        user = users.get_current_user()
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext
+        }   
+    
         template = JINJA_ENVIRONMENT.get_template('first_clue.html')
         self.response.write(template.render(template_values))
 
@@ -262,11 +280,11 @@ class UserHome(webapp2.RequestHandler):
 
         if users.get_current_user():
             template_url= 'user_home_page.html'
-            url = users.create_logout_url(self.request.uri)
+            log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
             template_url = 'home_page.html'
-            url = users.create_login_url(self.request.uri)
+            log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
         blog_query= db.GqlQuery("SELECT * FROM Blog " +
@@ -275,7 +293,7 @@ class UserHome(webapp2.RequestHandler):
 
         template_values = { 
             'user' : user,
-            'url': url,
+            'url': log_in_out_url,
             'url_linktext': url_linktext,
             'blogs' : blogs
         } 
@@ -288,8 +306,15 @@ class TeamHome(webapp2.RequestHandler):
 
     def get(self, team_name):
         user = users.get_current_user()
-        url_linktext = ""
         team_members = {}
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            template_url = 'home_page.html'
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
 
         if user:
             users_team_name = get_users_team_name(user)
@@ -305,7 +330,7 @@ class TeamHome(webapp2.RequestHandler):
 
         template_values = { 
             'user' : user,
-            'url': url,
+            'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
             'team_members': team_members
@@ -629,7 +654,7 @@ application = webapp2.WSGIApplication([
     ('/', HomePage),
     (r'/registration', Registration),
     (r'/team/(.*)', TeamHome),
-    (r'/firstclue/(.*)', FirstClue),
+    (r'/firstclue', FirstClue),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),
