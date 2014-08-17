@@ -57,16 +57,10 @@
     <div class="span3">
       <div class="well sidebar-nav">
         <ul class="nav nav-list">
-          <li class="nav-header">Your Blogs</li>
-          {% for blog in blogs %}
+          <li class="nav-header">Your Completed Challenges</li>
+          {% for challenge in challenges %}
           <div>
-          <li><a href="/blog/{{blog.title}}/">{{ blog.title }}</a></li>
-          </div>
-          {% endfor %}
-          <li class="nav-header">Tags of {{blog_name}}</li>
-          {% for tag in blog_tags %}
-          <div>
-          <li><a href="/search/{{blog_name}}/{{tag}}/">{{tag}}</a></li>
+          <li><a href="/{{challenge.url}}/">{{challenge.name}}</a></li>
           </div>
           {% endfor %}
         </ul>

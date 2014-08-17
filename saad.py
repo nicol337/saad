@@ -44,6 +44,11 @@ def get_users_team_members(user):
         team_members = team_member_query.run()
         return team_members
 
+class Challenge(db.Model):
+    name = db.StringProperty(required=True)
+    url = db.LinkProperty(required=True)
+    order_number = db.IntegerProperty(required=True)
+
 class Blog(db.Model):
     author = db.UserProperty(required=True)
     title = db.StringProperty(required=True)
@@ -66,6 +71,7 @@ class Team(db.Model):
     team_name = db.StringProperty(required=True)
     team_email = db.StringProperty(required=True)
     team_birth = db.DateTimeProperty(auto_now_add=True)
+    completed_challenges = db.ListProperty(Challenge)
 
     def get_team_email(self):
         return self.team_email
@@ -76,6 +82,8 @@ class Team(db.Model):
     def get_team_brith(self):
         return self.team_birth
 
+    def add_completed_challenge(self, challenge):
+        self.completed_challenges.append(challenge) 
 
 class TeamMember(db.Model):
     team_name = db.StringProperty(required=True)
@@ -258,10 +266,13 @@ class FirstClue(webapp2.RequestHandler):
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
+        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0’s are in the number, the second digit is how many 1’s are in the number, the third digit is how many 2’s are in the number, the fourth digit is how many 3’s are in the number, ... , the tenth digit is how many 9’s are in the number. What is this number?"
+
         template_values = { 
             'user' : user,
             'url': log_in_out_url,
-            'url_linktext': url_linktext
+            'url_linktext': url_linktext,
+            'clue_text': clue
         }   
     
         template = JINJA_ENVIRONMENT.get_template('first_clue.html')
@@ -655,6 +666,7 @@ class TagSearchPage(webapp2.RequestHandler):
 
         template = JINJA_ENVIRONMENT.get_template("tag_search_page.html")
         self.response.write(template.render(template_values))
+
 
 application = webapp2.WSGIApplication([
     ('/', HomePage),

@@ -57,7 +57,7 @@
           <h1>Saadiyat Games</h1>
           {% if user %}
           <p>
-            There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0&#39;s are in the number, the second is how many 1&#39;s are in the number, the third is how many 2&#39;s are in the number,..., the tenth digit is how many 9&#39;s are in the number. What is this special number?
+            {{ clue_text }}
           </p>
           <form action="/firstclue" method="post">
             <div>
@@ -68,11 +68,7 @@
             </div>
           </form>
           {$ else %}
-           <p> Please register your team email to enter the games</p>
-            <form action="/firstclue/register" method="post">
-              
-            </form>
-          <p>Already registered? Log in above</p>
+           <h2> Please log in above to view this clue or if you have not registered register <a href="saadiyatgames.appspot.com/registration">here</a></h2>
           {% endif %} <!-- end of if user-->
       </div>
     </div>
