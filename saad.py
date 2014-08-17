@@ -67,7 +67,6 @@ class Team(db.Model):
     team_email = db.StringProperty(required=True)
     team_birth = db.DateTimeProperty(auto_now_add=True)
 
-
     def get_team_email(self):
         return self.team_email
 
@@ -138,23 +137,23 @@ class Registration(webapp2.RequestHandler):
         new_team_member2 = self.request.get('team_member2')
 
 
-        existing_team_emails_query = db.GqlQuery("SELECT * FROM Team " +
+        existing_teams_with_new_team_email_query = db.GqlQuery("SELECT * FROM Team " +
                                             "WHERE team_email = :1", new_team_email)
-        existing_team_names_query = db.GqlQuery("SELECT * FROM Team " +
+        existing_teams_with_new_team_name_query = db.GqlQuery("SELECT * FROM Team " +
                                             "WHERE team_name = :1", new_team_name)
 
-        existing_team_emails = existing_team_emails_query.run()
-        existing_team_names = existing_team_names_query.run()
+        existing_teams_with_new_team_email = existing_teams_with_new_team_email_query.run()
+        existing_teams_with_new_team_name = existing_teams_with_new_team_name_query.run()
 
         can_register = True
 
-        for email in existing_team_emails:
-            if (email == new_team_email):
+        for team in existing_teams_with_new_team_email:
+            if (team.get_team_email() == new_team_email):
                 message += "Email is already tied to an account.\n"
                 can_register = False
         
-        for name in existing_team_names:
-            if (name == new_team_name):
+        for team in existing_teams_with_new_team_name:
+            if (team.get_team_name() == new_team_name):
                 message += "Team Name is already taken.\n"
                 can_register = False
 
@@ -307,6 +306,7 @@ class TeamHome(webapp2.RequestHandler):
     def get(self, team_name):
         user = users.get_current_user()
         team_members = {}
+        team_member_names = []
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
@@ -324,6 +324,8 @@ class TeamHome(webapp2.RequestHandler):
                 url = users.create_logout_url(self.request.uri)
                 url_linktext = 'Logout'
                 team_members = get_users_team_members(user)
+                for member in team_members:
+                    team_member_names.append(member.get_member_name())
 
         else:
             self.redirect('/') 
@@ -333,7 +335,7 @@ class TeamHome(webapp2.RequestHandler):
             'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
-            'team_members': team_members
+            'team_members_names': team_members_names
         }
        
         template = JINJA_ENVIRONMENT.get_template("team_home_page.html")
