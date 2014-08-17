@@ -266,7 +266,7 @@ class FirstClue(webapp2.RequestHandler):
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
-        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0’s are in the number, the second digit is how many 1’s are in the number, the third digit is how many 2’s are in the number, the fourth digit is how many 3’s are in the number, ... , the tenth digit is how many 9’s are in the number. What is this number?"
+        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in the number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
 
         template_values = { 
             'user' : user,
