@@ -67,11 +67,27 @@ class Blogpost(db.Model):
         self.tags = new_tags
         self.put()
 
+#         class FirstModel(db.Model):
+#     prop = db.IntegerProperty()
+
+# class SecondModel(db.Model):
+#     reference = db.ReferenceProperty(FirstModel)
+
+# obj1 = FirstModel()
+# obj1.prop = 42
+# obj1.put()
+
+# obj2 = SecondModel()
+
+# # A reference value is the key of another entity.
+# obj2.reference = obj1.key()
+
+
 class Team(db.Model):
     team_name = db.StringProperty(required=True)
     team_email = db.StringProperty(required=True)
     team_birth = db.DateTimeProperty(auto_now_add=True)
-    completed_challenges = db.ListProperty(Challenge)
+    completed_challenges = db.ListProperty(db.ReferenceProperty(Challenge))
 
     def get_team_email(self):
         return self.team_email
@@ -266,7 +282,7 @@ class FirstClue(webapp2.RequestHandler):
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
-        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in the number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
+        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in trhe number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
 
         template_values = { 
             'user' : user,
