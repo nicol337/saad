@@ -159,11 +159,11 @@ class Registration(webapp2.RequestHandler):
 
         if not new_team_member1:
             can_register = False
-            message += "Team Member 1 must not be blank"
+            message += "Team Member 1 must not be blank.\n"
 
         if not new_team_email:
             can_register = False
-            message += "Team Email must not be blank"
+            message += "Team Email must not be blank.\n"
 
         if (can_register):
             new_team = Team(team_name = new_team_name, team_email = new_team_email)
