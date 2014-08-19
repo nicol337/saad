@@ -47,7 +47,7 @@ def already_achieved(challenge_name, team_email):
 #     # print team_name (doing query by team_email)
 
 def get_team_achievements(team_email):
-    achievements_query = db.GqlQuery("SELECT * FROM Achievements " +
+    achievements_query = db.GqlQuery("SELECT * FROM Achievement " +
                                             "WHERE team_email = :1 " +
                                             "ORDER BY challenge_number DESC", team_email)
 
