@@ -60,7 +60,7 @@
           <li class="nav-header">Your Completed Challenges</li>
           {% for achievement in team_achievements %}
           <div>
-          <li><a href="/{{achievement.challenge_url}}/">{{achievement.challenge_name}}</a></li>
+          <li><a href="{{achievement.challenge_url}}">{{achievement.challenge_name}}</a></li>
           </div>
           {% endfor %}
         </ul>

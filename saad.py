@@ -371,7 +371,8 @@ class FirstClue(webapp2.RequestHandler):
             #put logged answer time code here
             message = "Correct!\n"
             if not already_achieved(challenge_name, user.email()):
-                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("firstclue"), challenge_number = 1)
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("/firstclue"), challenge_number = 1)
+                # may have issues with this link being absolute or not
                 new_achievement.put()
                 message += "New achievement added.\n"
 
