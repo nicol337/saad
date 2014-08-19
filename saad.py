@@ -185,6 +185,7 @@ class Scoreboard(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
+        teams = Team.all()
 
         team_name = ""
 
@@ -201,7 +202,8 @@ class Scoreboard(webapp2.RequestHandler):
             'user' : user,
             'url': log_in_out_url,
             'url_linktext': url_linktext,
-            'team_name': team_name
+            'team_name': team_name,
+            'teams': teams
         }   
     
         template = JINJA_ENVIRONMENT.get_template('scoreboard.html')

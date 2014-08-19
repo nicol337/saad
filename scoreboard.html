@@ -28,7 +28,7 @@
   </head>
    <body>
 
-     <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -46,37 +46,25 @@
               {% else %}
               <li><p class="navbar-text pull-right"><a href="{{ url|safe }}">Login</a></p></li>
               {% endif %}
+
             </ul>
           </div>
         </div>
       </div>
     </div> <!-- end of nav -->
 
-<div class="container-fluid">
-  <div class="row-fluid">
-    <div class="span3">
-      <div class="well sidebar-nav">
-        <ul class="nav nav-list">
-          <li class="nav-header">Your Completed Challenges</li>
-          {% for achievement in team_achievements %}
+    </div>
+       <div class="hero-unit" align="center">
+          <h1>Saadiyat Games Scoreboard</h1>
+          {% for team in teams %}
           <div>
-          <li><a href="/{{achievement.challenge_url}}/">{{achievement.challenge_name}}</a></li>
+            <h2>{{ team.team_name }}</h2>
+            <!-- <h3>team members name here  </h3> -->
           </div>
           {% endfor %}
-        </ul>
-      </div><!--/.well -->
-    </div><!--/span-->
-    <div class="span9">
-      <div class="hero-unit">
-        <h1>{{ team_name }}</h1>
-        {% if team_member_names %}
-          {% for name in team_member_names %}
-            <h2>{{ name }} </h2>
-          {% endfor %}
-        {% endif %}
+      </div>
     </div>
-</div><!--/.fluid-container-->
 
-</body>
+  </body>
 </html>
 {% endautoescape %}
