@@ -46,6 +46,12 @@ def already_achieved(challenge_name, team_email):
 #     # if team is not already in the list then add to scoreboard list
 #     # print team_name (doing query by team_email)
 
+def get_team_achievements(team_email):
+    achievements_query = db.GqlQuery("SELECT * FROM Achievements " +
+                                            "WHERE team_email = :1 " +
+                                            "ORDER BY challenge_number DESC", team_email)
+
+    return achievements_query.run()
 
 def get_users_team_name(user):
     team_query = db.GqlQuery("SELECT * FROM Team " +
@@ -69,7 +75,6 @@ def get_users_team_members(user):
         return team_members
 
 
-
 class Challenge(db.Model):
     name = db.StringProperty(required=True)
     url = db.LinkProperty(required=True)
@@ -82,6 +87,8 @@ class Achievement(db.Model):
     challenge_name = db.StringProperty(required=True)
     team_email = db.StringProperty(required=True)
     time_of_achievement = db.DateTimeProperty(auto_now_add=True)
+    challenge_url = db.LinkProperty(required=True)
+    challenge_number = db.IntegerProperty(required=True)
 
 class Blog(db.Model):
     author = db.UserProperty(required=True)
@@ -105,7 +112,6 @@ class Team(db.Model):
     team_name = db.StringProperty(required=True)
     team_email = db.StringProperty(required=True) #using as PK
     team_birth = db.DateTimeProperty(auto_now_add=True)
-    completed_challenges = db.StringListProperty()
 
     def get_team_email(self):
         return self.team_email
@@ -115,12 +121,6 @@ class Team(db.Model):
 
     def get_team_brith(self):
         return self.team_birth
-
-    def get_completed_challenges(self):
-        return self.completed_challenges
-
-    def add_completed_challenge(self, challenge_name):
-        self.completed_challenges.append(challenge_name) 
 
 class TeamMember(db.Model):
     team_name = db.StringProperty(required=True)
@@ -340,7 +340,7 @@ class FirstClue(webapp2.RequestHandler):
             #put logged answer time code here
             message = "Correct!\n"
             if not already_achieved(challenge_name, user.email()):
-                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email())
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://www.saadiyatgames.appspot.com/firstclue"), challenge_number = 1)
                 new_achievement.put()
                 message += "New achievement added.\n"
 
@@ -428,16 +428,12 @@ class TeamHome(webapp2.RequestHandler):
         user = users.get_current_user()
         team_members = {}
         team_member_names = []
-
-        if users.get_current_user():
-            log_in_out_url = users.create_logout_url(self.request.uri)
-            url_linktext = 'Logout'
-        else:
-            template_url = 'home_page.html'
-            log_in_out_url = users.create_login_url(self.request.uri)
-            url_linktext = 'Login'
+        team_achievements = {}
 
         if user:
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+
             users_team_name = get_users_team_name(user)
             if users_team_name != team_name:
                 self.redirect('/')
@@ -447,6 +443,8 @@ class TeamHome(webapp2.RequestHandler):
                 team_members = get_users_team_members(user)
                 for member in team_members:
                     team_member_names.append(member.get_member_name())
+                team_achievements = get_team_achievements(user.email())
+
 
         else:
             self.redirect('/')
@@ -456,7 +454,8 @@ class TeamHome(webapp2.RequestHandler):
             'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
-            'team_member_names': team_member_names
+            'team_member_names': team_member_names,
+            'team_achievements': team_achievements
         }
        
         template = JINJA_ENVIRONMENT.get_template("team_home_page.html")
