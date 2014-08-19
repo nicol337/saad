@@ -284,7 +284,7 @@ class Registration(webapp2.RequestHandler):
             'user' : user,
             'url': log_in_out_url,
             'url_linktext': url_linktext,
-            'team_name': 
+            'team_name': team_name
         }   
     
         template = JINJA_ENVIRONMENT.get_template('registration.html')
