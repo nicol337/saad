@@ -23,6 +23,23 @@ def to_link(str):
         new_link = str
     return jinja2.Markup(new_link)
 
+def already_achieved(challenge_name, team_email):
+    team_query = db.GqlQuery("SELECT * FROM Team " +
+                                    "WHERE team_email = :1", team_email)
+
+    already_achieved = False
+
+    if (team_query.count() == 1): 
+        teams = team_query.run(limit=1)
+        achievement_query = db.GqlQuery("SELECT * FROM Achievement" + 
+                                    "WHERE team_email = :1 AND challenge_name = :2", team_email, challenge_name)
+        for team in teams:
+            if (achievement_query.count() > 0):
+                return True
+
+    return False
+
+
 def get_users_team_name(user):
     team_query = db.GqlQuery("SELECT * FROM Team " +
                                     "WHERE team_email = :1", user.email())
@@ -49,6 +66,14 @@ class Challenge(db.Model):
     url = db.LinkProperty(required=True)
     order_number = db.IntegerProperty(required=True)
 
+    def get_name(self):
+        return self.name
+
+class Achievement(db.Model):
+    challenge_name = db.StringProperty(required=True)
+    team_email = db.StringProperty(required=True)
+    time_of_achievement = db.DateTimeProperty(auto_now_add=True)
+
 class Blog(db.Model):
     author = db.UserProperty(required=True)
     title = db.StringProperty(required=True)
@@ -67,27 +92,11 @@ class Blogpost(db.Model):
         self.tags = new_tags
         self.put()
 
-#         class FirstModel(db.Model):
-#     prop = db.IntegerProperty()
-
-# class SecondModel(db.Model):
-#     reference = db.ReferenceProperty(FirstModel)
-
-# obj1 = FirstModel()
-# obj1.prop = 42
-# obj1.put()
-
-# obj2 = SecondModel()
-
-# # A reference value is the key of another entity.
-# obj2.reference = obj1.key()
-
-
 class Team(db.Model):
     team_name = db.StringProperty(required=True)
-    team_email = db.StringProperty(required=True)
+    team_email = db.StringProperty(required=True) #using as PK
     team_birth = db.DateTimeProperty(auto_now_add=True)
-    completed_challenges = db.ListProperty(db.ReferenceProperty(Challenge))
+    completed_challenges = db.StringListProperty()
 
     def get_team_email(self):
         return self.team_email
@@ -98,8 +107,11 @@ class Team(db.Model):
     def get_team_brith(self):
         return self.team_birth
 
-    def add_completed_challenge(self, challenge):
-        self.completed_challenges.append(challenge) 
+    def get_completed_challenges(self):
+        return self.completed_challenges
+
+    def add_completed_challenge(self, challenge_name):
+        self.completed_challenges.append(challenge_name) 
 
 class TeamMember(db.Model):
     team_name = db.StringProperty(required=True)
@@ -117,7 +129,25 @@ class TeamMember(db.Model):
 
 class HomePage(webapp2.RequestHandler):
 
+
     def get(self):
+
+        # challenges = []
+
+        # first_clue_challenge = Challenge(name="first_clue", url=db.Link("http://saadiyatgames.appspot.com/firstclue"), order_number=1)
+        # challenges.append(first_clue_challenge)
+
+        # goose_chase_challenge = Challenge(name="goose_chase", url=db.Link("http://saadiyatgames.appspot.com/goose_chase"), order_number=2)
+        # challenges.append(goose_chase_challenge)
+
+
+        # for challenge in challenges:
+        #     challenge_query = db.GqlQuery("SELECT * FROM Challenge " +
+        #                                 "WHERE name = :1", challenge.get_name())
+        #     if not challenge_query.run():
+        #         challenge.put()
+
+
         user = users.get_current_user()
 
         team_name = ""
@@ -229,8 +259,6 @@ class Registration(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('registration.html')
             self.response.write(template.render(template_values))
 
-
-
     def get(self):
         user = users.get_current_user()
 
@@ -250,11 +278,12 @@ class Registration(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('registration.html')
         self.response.write(template.render(template_values))
 
+class GooseChase(webapp2.RequestHandler):
 
-class FirstClue(webapp2.RequestHandler):
-
-    def post(self):
+    def get(self):
         user = users.get_current_user()
+
+        clue = "Get your next clue from this professor."
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
@@ -266,7 +295,55 @@ class FirstClue(webapp2.RequestHandler):
         template_values = { 
             'user' : user,
             'url': log_in_out_url,
-            'url_linktext': url_linktext
+            'url_linktext': url_linktext,
+            'clue_text': clue
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('goose_chase.html')
+        self.response.write(template.render(template_values))
+
+class FirstClue(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "first_clue"
+        message = ""
+        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in the number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
+
+        answer = "6210001000"
+        attempted_answer = self.request.get('attempted_answer')
+        attempted_answer = attempted_answer.strip()
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (attempted_answer == answer):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email())
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+
+            # self.redirect('/goose_chase')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
         }   
     
         template = JINJA_ENVIRONMENT.get_template('first_clue.html')
@@ -338,6 +415,7 @@ class TeamHome(webapp2.RequestHandler):
         user = users.get_current_user()
         team_members = {}
         team_member_names = []
+        team_name = ""
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
@@ -359,7 +437,7 @@ class TeamHome(webapp2.RequestHandler):
                     team_member_names.append(member.get_member_name())
 
         else:
-            self.redirect('/') 
+            self.redirect('/')
 
         template_values = { 
             'user' : user,
@@ -689,6 +767,7 @@ application = webapp2.WSGIApplication([
     (r'/registration', Registration),
     (r'/team/(.*)', TeamHome),
     (r'/firstclue', FirstClue),
+    (r'/goose_chase', GooseChase),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),

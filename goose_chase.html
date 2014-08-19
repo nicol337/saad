@@ -59,17 +59,10 @@
           <p>
             {{ message }}
           </p>
+          <img src="http://saadiyatgames.com/images/professor.jpg" />
           <p>
             {{ clue_text }}
           </p>
-          <form action="/firstclue" method="post">
-            <div>
-              <textarea id="attempted_answer" name="attempted_answer" rows="1" cols="60"></textarea>
-            </div>
-            <div>
-              <input type="submit" value="Am I right?">
-            </div>
-          </form>
           {% else %}
            <h2> Please log in above to view this clue or if you have not registered register <a href="saadiyatgames.appspot.com/registration">here</a></h2>
           {% endif %} <!-- end of if user-->
