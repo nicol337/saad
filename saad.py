@@ -428,7 +428,6 @@ class TeamHome(webapp2.RequestHandler):
         user = users.get_current_user()
         team_members = {}
         team_member_names = []
-        team_name = ""
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
