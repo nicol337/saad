@@ -58,9 +58,9 @@
       <div class="well sidebar-nav">
         <ul class="nav nav-list">
           <li class="nav-header">Your Completed Challenges</li>
-          {% for challenge in challenges %}
+          {% for achievement in team_achievements %}
           <div>
-          <li><a href="/{{challenge.url}}/">{{challenge.name}}</a></li>
+          <li><a href="/{{achievement.challenge_url}}/">{{achievement.challenge_name}}</a></li>
           </div>
           {% endfor %}
         </ul>
