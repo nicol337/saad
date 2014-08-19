@@ -181,18 +181,47 @@ class HomePage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('home_page.html')
         self.response.write(template.render(template_values))
 
+class Scoreboard(webapp2.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+
+        team_name = ""
+
+        if user:
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('scoreboard.html')
+        self.response.write(template.render(template_values))
+
+
+
 class Registration(webapp2.RequestHandler):
 
     def post(self):
+        user = users.get_current_user()
 
-        if users.get_current_user():
+        if user:
             log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
-        user = users.get_current_user()
+        
         message = ""
         new_team_name = self.request.get('team_name')
         new_team_email = self.request.get('team_email')
@@ -776,6 +805,7 @@ class TagSearchPage(webapp2.RequestHandler):
 application = webapp2.WSGIApplication([
     ('/', HomePage),
     (r'/registration', Registration),
+    (r'/scoreboard', Scoreboard),
     (r'/team/(.*)', TeamHome),
     (r'/firstclue', FirstClue),
     (r'/goose_chase', GooseChase),

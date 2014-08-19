@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Achievement
+  properties:
+  - name: team_email
+  - name: challenge_number
+    direction: desc
+
 - kind: Blog
   properties:
   - name: author
