@@ -270,10 +270,12 @@ class Registration(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
+        team_name = ""
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
@@ -281,7 +283,8 @@ class Registration(webapp2.RequestHandler):
         template_values = { 
             'user' : user,
             'url': log_in_out_url,
-            'url_linktext': url_linktext
+            'url_linktext': url_linktext,
+            'team_name': 
         }   
     
         template = JINJA_ENVIRONMENT.get_template('registration.html')
