@@ -31,13 +31,20 @@ def already_achieved(challenge_name, team_email):
 
     if (team_query.count() == 1): 
         teams = team_query.run(limit=1)
-        achievement_query = db.GqlQuery("SELECT * FROM Achievement" + 
-                                    "WHERE team_email = :1 AND challenge_name = :2", team_email, challenge_name)
+    
+        achievement_query = db.GqlQuery("SELECT * FROM Achievement " +
+                "WHERE team_email = :1 AND challenge_name = :2", team_email, challenge_name)
+
         for team in teams:
             if (achievement_query.count() > 0):
                 return True
 
     return False
+
+# def team_standings():
+#     # need to sort Achievements by challenge, and then by time.
+#     # if team is not already in the list then add to scoreboard list
+#     # print team_name (doing query by team_email)
 
 
 def get_users_team_name(user):
@@ -60,6 +67,8 @@ def get_users_team_members(user):
     if (team_member_query.count() == 1) or (team_member_query.count() == 2):
         team_members = team_member_query.run()
         return team_members
+
+
 
 class Challenge(db.Model):
     name = db.StringProperty(required=True)
