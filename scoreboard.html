@@ -40,7 +40,7 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               {% if user %}
-              <li><a href="/team/{{team_name}}">Home</a></li>
+              <li><a href="/team/{{team_name}}">{{team_name}}</a></li>
               <li><p class="navbar-text pull-right">Logged in as {{ user }}</p></li>
               <li><a href="{{ url|safe }}">{{ url_linktext }}</a></li>
               {% else %}
@@ -57,8 +57,9 @@
        <div class="hero-unit" align="center">
           <h1>Saadiyat Games Scoreboard</h1>
           {% for team in teams %}
-          <div>
+          <div class="row">
             <h2>{{ team.team_name }}</h2>
+            <h2>{{ team.team_email }}</h2>
             <!-- <h3>team members name here  </h3> -->
           </div>
           {% endfor %}

@@ -141,22 +141,6 @@ class HomePage(webapp2.RequestHandler):
 
     def get(self):
 
-        # challenges = []
-
-        # first_clue_challenge = Challenge(name="first_clue", url=db.Link("http://saadiyatgames.appspot.com/firstclue"), order_number=1)
-        # challenges.append(first_clue_challenge)
-
-        # goose_chase_challenge = Challenge(name="goose_chase", url=db.Link("http://saadiyatgames.appspot.com/goose_chase"), order_number=2)
-        # challenges.append(goose_chase_challenge)
-
-
-        # for challenge in challenges:
-        #     challenge_query = db.GqlQuery("SELECT * FROM Challenge " +
-        #                                 "WHERE name = :1", challenge.get_name())
-        #     if not challenge_query.run():
-        #         challenge.put()
-
-
         user = users.get_current_user()
 
         team_name = ""
@@ -166,6 +150,8 @@ class HomePage(webapp2.RequestHandler):
             url_linktext = 'Logout'
 
             team_name = get_users_team_name(user)
+            if not team_name:
+                self.redirect('/registration')
 
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
@@ -215,20 +201,23 @@ class Registration(webapp2.RequestHandler):
 
     def post(self):
         user = users.get_current_user()
+        already_has_team = get_users_team_name(user)
+
+        message = ""
+        new_team_name = self.request.get('team_name')
+        new_team_email = self.request.get('team_email')
+        new_team_member1 = self.request.get('team_member1')
+        new_team_member2 = self.request.get('team_member2')        
 
         if user:
             log_in_out_url = users.create_logout_url(self.request.uri)
+            if not already_has_team:
+                new_team_email = user.email()
             url_linktext = 'Logout'
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
-        
-        message = ""
-        new_team_name = self.request.get('team_name')
-        new_team_email = self.request.get('team_email')
-        new_team_member1 = self.request.get('team_member1')
-        new_team_member2 = self.request.get('team_member2')
 
 
         existing_teams_with_new_team_email_query = db.GqlQuery("SELECT * FROM Team " +
@@ -303,10 +292,11 @@ class Registration(webapp2.RequestHandler):
         team_name = ""
         message = ""
 
-        if users.get_current_user():
+        if user:
+            team_name = get_users_team_name(user)
             log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
-            team_name = get_users_team_name(user)
+            
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
@@ -396,10 +386,12 @@ class FirstClue(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
+        team_name = ""
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
         else:
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
@@ -410,7 +402,8 @@ class FirstClue(webapp2.RequestHandler):
             'user' : user,
             'url': log_in_out_url,
             'url_linktext': url_linktext,
-            'clue_text': clue
+            'clue_text': clue,
+            'team_name': team_name
         }   
     
         template = JINJA_ENVIRONMENT.get_template('first_clue.html')
