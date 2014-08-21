@@ -56,7 +56,8 @@
        <div class="hero-unit" align="center">
           <h1>Saadiyat Games</h1> 
           
-          {% if not user or not already_has_team%}
+          <!-- having issues -->
+          {% if (user and not team_name) or (not user)%}
           <h2>Register Your Team</h2>
           <p>{{ message }}</p>
           {% if not registered%}
