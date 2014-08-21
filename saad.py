@@ -113,7 +113,7 @@ def get_highest_achievement(team_email):
     if not achievements: 
         return False
     for achievement in achievements:
-        return achievement.challenge_number
+        return achievement
 
 
 
