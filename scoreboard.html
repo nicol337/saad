@@ -65,12 +65,13 @@
             </div>
         {% endfor %}
           <div class="hero-unit" align="center">
-            <h1>Unranked Teams (No challenged completed)</h1>
+            <h1>Unranked Teams</h1>
+            <h2>(No challenges completed)</h2>
           </div>
         {% for team in unachieved_teams %}
             <div class="hero-unit" align="center">
             <h2>{{ team.team_name }}</h2>
-            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
+            <h3></h3>
             </div>
         {% endfor %}
     </div>

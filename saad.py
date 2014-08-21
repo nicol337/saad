@@ -131,9 +131,6 @@ def get_highest_achievement(team_email):
 
 def get_users_team_name(user):
 
-    if not user:
-        return None
-
     team_query = db.GqlQuery("SELECT * FROM Team " +
                                     "WHERE team_email = :1", user.email())
     team_name = ""
@@ -439,6 +436,7 @@ class LiarsRiddle(webapp2.RequestHandler):
         answer = "CELINE"
         attempted_answer = self.request.get('attempted_answer')
         attempted_answer = attempted_answer.strip()
+        attempted_answer = attempted_answer.upper()
 
         if users.get_current_user():
             log_in_out_url = users.create_logout_url(self.request.uri)
@@ -452,7 +450,7 @@ class LiarsRiddle(webapp2.RequestHandler):
             #put logged answer time code here
             message = "Correct!\n"
             if not already_achieved(challenge_name, user.email()):
-                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/liarliar"), challenge_number = 1)
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/liarliar"), challenge_number = 2)
                 # may have issues with this link being absolute or not
                 new_achievement.put()
                 message += "New achievement added.\n"
