@@ -410,6 +410,79 @@ class GooseChase(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('goose_chase.html')
         self.response.write(template.render(template_values))
 
+class LiarsRiddle(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Liars Riddle"
+        message = ""
+        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they’ve cheated with but they have said how many other people they’ve cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they’re cheating with more people than they have been, but a few may say they’ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?\n"
+
+        answer = "CELINE"
+        attempted_answer = self.request.get('attempted_answer')
+        attempted_answer = attempted_answer.strip()
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (attempted_answer == answer):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("/firstclue"), challenge_number = 1)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+
+            # self.redirect('/goose_chase')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('liars_riddle.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in trhe number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('first_clue.html')
+        self.response.write(template.render(template_values))
+
 class FirstClue(webapp2.RequestHandler):
 
     def post(self):
@@ -881,6 +954,7 @@ application = webapp2.WSGIApplication([
     (r'/team/(.*)', TeamHome),
     (r'/firstclue', FirstClue),
     (r'/goose_chase', GooseChase),
+    (r'/liarliar', LiarsRiddle),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),

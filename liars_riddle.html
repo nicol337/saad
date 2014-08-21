@@ -26,7 +26,7 @@
     </style>
 
   </head>
-   <body>
+  <body>
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -46,34 +46,35 @@
               {% else %}
               <li><p class="navbar-text pull-right"><a href="{{ url|safe }}">Login</a></p></li>
               {% endif %}
-
             </ul>
           </div>
         </div>
       </div>
     </div> <!-- end of nav -->
 
-    <div class="container-fluid">
-      <div class="hero-unit" align="center">
-        <h1>Saadiyat Games Scoreboard</h1>
-      </div>
-        {% for team in achieved_teams %}
-            <div class="hero-unit" align="center">
-            <h2>{{team.standings}} {{ team.team_name }}</h2>
-            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
-            </div>
-        {% endfor %}
-          <div class="hero-unit" align="center">
-            <h1>Unranked Teams (No challenged completed)</h1>
-          </div>
-        {% for team in unachieved_teams %}
-            <div class="hero-unit" align="center">
-            <h2>{{ team.team_name }}</h2>
-            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
-            </div>
-        {% endfor %}
     </div>
-      
+      <div class="hero-unit" align="center">
+          <h1>Saadiyat Games</h1>
+          {% if user %}
+          <p>
+            {{ message }}
+          </p>
+          <p>
+            {{ clue_text }}
+          </p>
+          <form action="/liarliar" method="post">
+            <div>
+              <textarea id="attempted_answer" name="attempted_answer" rows="1" cols="60"></textarea>
+            </div>
+            <div>
+              <input type="submit" value="Am I right?">
+            </div>
+          </form>
+          {% else %}
+           <h2> Please log in above to view this clue or if you have not registered register <a href="saadiyatgames.appspot.com/registration">here</a></h2>
+          {% endif %} <!-- end of if user-->
+      </div>
+    </div>
 
   </body>
 </html>
