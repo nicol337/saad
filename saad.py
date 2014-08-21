@@ -42,24 +42,36 @@ def already_achieved(challenge_name, team_email):
     return False
 
 class ScoreboardStanding:
-    team_name = ""
-    team_birth = -1
-    team_members = {}
-    highest_challenge_number = -1
-    time_of_achievement = db.DateTimeProperty()
-
-    standings = -1
-
     def __init__(self, team_name, team_birth, team_members, highest_achievement = None):
         self.team_name = team_name
         self.team_birth = team_birth
         self.team_members = team_members
         if highest_achievement:
-            highest_challenge_number = highest_achievement.challenge_number
-            time_of_achievement = highest_achievement.time_of_achievement
+            self.highest_challenge_number = highest_achievement.challenge_number
+            self.highest_challenge_name = highest_achievement.challenge_name
+            self.time_of_achievement = highest_achievement.time_of_achievement
+        else:
+            self.highest_challenge_number = -1
+            self.highest_challenge_name = ""
+            self.time_of_achievement = db.DateTimeProperty()
+        self.standings = -1
 
     def set_standings(self, standing):
         self.standings = standing
+
+    def __getitem__(self, key = None):
+        if key == 0:
+            return self.team_name
+        elif key == 1:
+            return self.team_birth
+        elif key == 2:
+            return self.team_members
+        elif key ==3:
+            return self.highest_challenge_number
+        elif key == 4:
+            return self.time_of_achievement
+        else:
+            return self.team_name
 
 
 def get_team_standings():
@@ -118,6 +130,10 @@ def get_highest_achievement(team_email):
 
 
 def get_users_team_name(user):
+
+    if not user:
+        return None
+
     team_query = db.GqlQuery("SELECT * FROM Team " +
                                     "WHERE team_email = :1", user.email())
     team_name = ""
@@ -262,7 +278,7 @@ class Scoreboard(webapp2.RequestHandler):
             'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
-            'achived_teams': achieved_teams,
+            'achieved_teams': achieved_teams,
             'unachieved_teams': unachieved_teams
         }   
     
@@ -417,7 +433,8 @@ class LiarsRiddle(webapp2.RequestHandler):
         team_name = get_users_team_name(user)
         challenge_name = "Liars Riddle"
         message = ""
-        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they have cheated with but they have said how many other people they have cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they’re cheating with more people than they have been, but a few may say they’ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?\n"
+        
+        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they&rsquo;ve cheated with but they have said how many other people they&rsquo;ve cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they&rsquo;re cheating with more people than they have been, but a few may say they&rsquo;ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?"
 
         answer = "CELINE"
         attempted_answer = self.request.get('attempted_answer')
@@ -435,7 +452,7 @@ class LiarsRiddle(webapp2.RequestHandler):
             #put logged answer time code here
             message = "Correct!\n"
             if not already_achieved(challenge_name, user.email()):
-                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("/firstclue"), challenge_number = 1)
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/liarliar"), challenge_number = 1)
                 # may have issues with this link being absolute or not
                 new_achievement.put()
                 message += "New achievement added.\n"
@@ -470,7 +487,7 @@ class LiarsRiddle(webapp2.RequestHandler):
             log_in_out_url = users.create_login_url(self.request.uri)
             url_linktext = 'Login'
 
-        clue = "There is a special ten digit number. Each digit of the number is a count. The first digit is how many 0s are in trhe number, the second digit is how many 1s are in the number, the third digit is how many 2s are in the number, the fourth digit is how many 3s are in the number, ... , the tenth digit is how many 9s are in the number. What is this number?"
+        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they&rsquo;ve cheated with but they have said how many other people they&rsquo;ve cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they&rsquo;re cheating with more people than they have been, but a few may say they&rsquo;ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?"
 
         template_values = { 
             'user' : user,
@@ -480,7 +497,7 @@ class LiarsRiddle(webapp2.RequestHandler):
             'team_name': team_name
         }   
     
-        template = JINJA_ENVIRONMENT.get_template('first_clue.html')
+        template = JINJA_ENVIRONMENT.get_template('liars_riddle.html')
         self.response.write(template.render(template_values))
 
 class FirstClue(webapp2.RequestHandler):
@@ -508,7 +525,7 @@ class FirstClue(webapp2.RequestHandler):
             #put logged answer time code here
             message = "Correct!\n"
             if not already_achieved(challenge_name, user.email()):
-                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("/firstclue"), challenge_number = 1)
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/firstclue"), challenge_number = 1)
                 # may have issues with this link being absolute or not
                 new_achievement.put()
                 message += "New achievement added.\n"

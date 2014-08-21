@@ -59,8 +59,9 @@
       </div>
         {% for team in achieved_teams %}
             <div class="hero-unit" align="center">
-            <h2>{{team.standings}} {{ team.team_name }}</h2>
-            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
+            <h2>{{team.standings}}</h2>
+             <h2>{{ team.team_name }}</h2>
+            <h3>Last Completed: {{ team.highest_challenge_name }}</h3>
             </div>
         {% endfor %}
           <div class="hero-unit" align="center">
