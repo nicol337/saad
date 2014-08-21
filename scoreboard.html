@@ -53,18 +53,27 @@
       </div>
     </div> <!-- end of nav -->
 
-    </div>
-       <div class="hero-unit" align="center">
-          <h1>Saadiyat Games Scoreboard</h1>
-          {% for team in teams %}
-          <div class="row">
-            <h2>{{ team.team_name }}</h2>
-            <h2>{{ team.team_email }}</h2>
-            <!-- <h3>team members name here  </h3> -->
-          </div>
-          {% endfor %}
+    <div class="container-fluid">
+      <div class="hero-unit" align="center">
+        <h1>Saadiyat Games Scoreboard</h1>
       </div>
+        {% for team in achieved_teams %}
+            <div class="hero-unit" align="center">
+            <h2>{{team.standings}} {{ team.team_name }}</h2>
+            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
+            </div>
+        {% endfor %}
+          <div>
+            <h1>Unranked Teams (No challenged completed)</h1>
+          </div>
+        {% for team in unachieved_teams %}
+            <div class="hero-unit" align="center">
+            <h2>{{ team.team_name }}</h2>
+            <h3>{{ team.team_email }} {{ team.team_birth }}</h3>
+            </div>
+        {% endfor %}
     </div>
+      
 
   </body>
 </html>

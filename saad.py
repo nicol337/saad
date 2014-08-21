@@ -41,10 +41,65 @@ def already_achieved(challenge_name, team_email):
 
     return False
 
-# def team_standings():
-#     # need to sort Achievements by challenge, and then by time.
-#     # if team is not already in the list then add to scoreboard list
-#     # print team_name (doing query by team_email)
+class ScoreboardStanding:
+    team_name = ""
+    team_birth = -1
+    team_members = {}
+    highest_challenge_number = -1
+    time_of_achievement = db.DateTimeProperty()
+
+    standings = -1
+
+    def __init__(self, team_name, team_birth, team_members, highest_achievement = None):
+        self.team_name = team_name
+        self.team_birth = team_birth
+        self.team_members = team_members
+        if highest_achievement:
+            highest_challenge_number = highest_achievement.challenge_number
+            time_of_achievement = highest_achievement.time_of_achievement
+
+    def set_standings(self, standing):
+        self.standings = standing
+
+
+def get_team_standings():
+    # need to sort Achievements by challenge, and then by time.
+    # if team is not already in the list then add to scoreboard list
+    # print team_name (doing query by team_email)
+    teams = Team.all()
+    achieved_teams = []
+    unachieved_teams = []
+
+    # separate teams into achieved_teams and unachieved_teams
+    for team in teams:
+        team_name = team.team_name
+        team_email = team.team_email
+        team_birth = team.team_birth
+        highest_achievement = get_highest_achievement(team.team_email)
+        team_members = get_team_members(team.team_email)
+
+        new_entry = ScoreboardStanding(team_name, team_birth, team_members, highest_achievement)
+
+        if not highest_achievement:
+            unachieved_teams.append(new_entry)
+        else:
+            achieved_teams.append(new_entry)
+
+
+
+
+    unachieved_teams.sort(key=lambda x: x.team_birth)
+
+    achieved_teams.sort(key=lambda x: (-x[3], x[4]))
+
+
+    standings_itr = 1
+    for each_team in achieved_teams:
+        each_team.set_standings(standings_itr)
+        standings_itr+=1
+
+
+    return achieved_teams, unachieved_teams
 
 def get_team_achievements(team_email):
     achievements_query = db.GqlQuery("SELECT * FROM Achievement " +
@@ -52,6 +107,15 @@ def get_team_achievements(team_email):
                                             "ORDER BY challenge_number DESC", team_email)
 
     return achievements_query.run()
+
+def get_highest_achievement(team_email):
+    achievements = get_team_achievements(team_email)
+    if not achievements: 
+        return False
+    for achievement in achievements:
+        return achievement.challenge_number
+
+
 
 def get_users_team_name(user):
     team_query = db.GqlQuery("SELECT * FROM Team " +
@@ -70,6 +134,13 @@ def get_users_team_name(user):
 def get_users_team_members(user):
     team_member_query = db.GqlQuery("SELECT * FROM TeamMember " +
                                     "WHERE team_email = :1", user.email())
+    if (team_member_query.count() == 1) or (team_member_query.count() == 2):
+        team_members = team_member_query.run()
+        return team_members
+
+def get_team_members(team_email):
+    team_member_query = db.GqlQuery("SELECT * FROM TeamMember " +
+                                    "WHERE team_email = :1", team_email)
     if (team_member_query.count() == 1) or (team_member_query.count() == 2):
         team_members = team_member_query.run()
         return team_members
@@ -171,7 +242,9 @@ class Scoreboard(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
-        teams = Team.all()
+        # teams = Team.all()
+        achieved_teams,unachieved_teams = get_team_standings()
+
 
         team_name = ""
 
@@ -189,7 +262,8 @@ class Scoreboard(webapp2.RequestHandler):
             'url': log_in_out_url,
             'url_linktext': url_linktext,
             'team_name': team_name,
-            'teams': teams
+            'achived_teams': achieved_teams,
+            'unachieved_teams': unachieved_teams
         }   
     
         template = JINJA_ENVIRONMENT.get_template('scoreboard.html')
