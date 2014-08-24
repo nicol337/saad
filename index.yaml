@@ -14,6 +14,11 @@ indexes:
   properties:
   - name: team_email
   - name: challenge_number
+
+- kind: Achievement
+  properties:
+  - name: team_email
+  - name: challenge_number
     direction: desc
 
 - kind: Blog

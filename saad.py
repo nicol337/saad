@@ -116,7 +116,7 @@ def get_team_standings():
 def get_team_achievements(team_email):
     achievements_query = db.GqlQuery("SELECT * FROM Achievement " +
                                             "WHERE team_email = :1 " +
-                                            "ORDER BY challenge_number DESC", team_email)
+                                            "ORDER BY challenge_number ASC", team_email)
 
     return achievements_query.run()
 
@@ -397,6 +397,82 @@ class Registration(webapp2.RequestHandler):
         }   
     
         template = JINJA_ENVIRONMENT.get_template('registration.html')
+        self.response.write(template.render(template_values))
+
+class Apartments(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Apartment Riddle"
+        challenge_number = 3
+        message = ""
+        
+        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they&rsquo;ve cheated with but they have said how many other people they&rsquo;ve cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they&rsquo;re cheating with more people than they have been, but a few may say they&rsquo;ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?"
+
+        answer = "13"
+        attempted_answer = self.request.get('attempted_answer')
+        attempted_answer = attempted_answer.strip()
+        attempted_answer = attempted_answer.upper()
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (attempted_answer == answer):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/apartments"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('apartments_puzzle.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "In one of the Saadiyat apartments, the contractors had an option of how to build the double and single rooms. The requirements were that on one side of a hallway there needed to be six bedrooms but the builders could make them all doubles with two bedrooms in one room, all singles with one bedroom per room, or a mix of both. How many different ways could they have modeled the six bedrooms?"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('apartments_puzzle.html')
         self.response.write(template.render(template_values))
 
 class GooseChase(webapp2.RequestHandler):
@@ -967,9 +1043,12 @@ application = webapp2.WSGIApplication([
     (r'/registration', Registration),
     (r'/scoreboard', Scoreboard),
     (r'/team/(.*)', TeamHome),
+    # Week 1
     (r'/firstclue', FirstClue),
     (r'/goose_chase', GooseChase),
     (r'/liarliar', LiarsRiddle),
+    # Week 2
+    (r'/apartments', Apartments),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),
