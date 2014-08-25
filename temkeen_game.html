@@ -11,7 +11,6 @@
         padding-top: 60px;
         padding-bottom: 40px;
       }
-
       .sidebar-nav {
         padding: 9px 0;
       }
@@ -24,10 +23,32 @@
           padding-right: 5px;
         }
       }
-      </style>
+
+      input[type=checkbox] {
+        display:none;
+      }
+
+      input[type=checkbox] + label
+      {
+        background: #999;
+        height: 100px;
+        width: 100px;
+        display:inline-block;
+        padding: 0 0 0 0px;
+      }
+
+      input[type=checkbox]:checked + label
+      {
+        background: #0080FF;
+        height: 100px;
+        width: 100px;
+        display:inline-block;
+        padding: 0 0 0 0px;
+      }
+    </style>
 
   </head>
-   <body>
+  <body>
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
@@ -55,33 +76,27 @@
     </div> <!-- end of nav -->
 
     </div>
-       <div class="hero-unit" align="center">
-          <h1>Saadiyat Games</h1> 
-          
-          <!-- having issues -->
-          {% if (user and not team_name) or (not user)%}
-          <h2>Register Your Team</h2>
-          <p>{{ message }}</p>
-          {% if not registered%}
-           <p> Please enter the following information:</p>
-            <form action="/registration" method="post">
-               <div>
-              Team Name: <textarea id="team_name" name="team_name" rows="1" cols="60"></textarea>
-              <br>
-              Team Member #1:* <textarea id="team_member1" name="team_member1" rows="1" cols="60"></textarea>
-              <br>
-              Team Member #2: <textarea id="team_member2" name="team_member2" rows="1" cols="60"></textarea>
-              <br>
-              Team Gmail or an NYU email: * <textarea id="team_email" name="team_email" rows="1" cols="60"></textarea>
-            </div>
+      <div class="hero-unit" align="center">
+          <h1>Saadiyat Games</h1>
+          {% if user %}
+          <p>
+            {{ message }}
+          </p>
+          <p>
+            {{ clue_text|safe }}
+          </p>
+          <form action="/temkeen" method="post">
+            <!-- <input type="checkbox" class="custom_image" name="number" id="4" value="4">4
+            <input type="checkbox" class="custom_image" name="number" id="5" value="5">5
+            <input type="checkbox" class="custom_image" name="number" id="6" value="6">6
+            <input type="checkbox" class="custom_image" name="number" id="7" value="7">7 -->
+             <input type='checkbox' name='thing' value='valuable' id="thing"/><label for="thing"><img src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTNmWKANRc1Ou8o2Fha-qcDKgfqMJO2IUDGWCHIO7QmoChQt1xsquRK8PRO" /></label>
             <div>
-              <input type="submit" value="Game on.">
+              <input type="submit" value="Am I right?">
             </div>
-            </form>
-          <p>Already registered? Log in above</p>
+          </form>
           {% else %}
-            <p>Log into your teams home page above</p>
-            {% endif %}
+           <h2> Please log in above to view this clue or if you have not registered register <a href="saadiyatgames.appspot.com/registration">here</a></h2>
           {% endif %} <!-- end of if user-->
       </div>
     </div>

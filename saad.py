@@ -72,7 +72,7 @@ class ScoreboardStanding:
             return self.time_of_achievement
         else:
             return self.team_name
-
+  
 
 def get_team_standings():
     # need to sort Achievements by challenge, and then by time.
@@ -113,12 +113,13 @@ def get_team_standings():
 
     return achieved_teams, unachieved_teams
 
-def get_team_achievements(team_email):
+def get_team_achievements(team_email, orderby = "DESC"):
     achievements_query = db.GqlQuery("SELECT * FROM Achievement " +
                                             "WHERE team_email = :1 " +
-                                            "ORDER BY challenge_number ASC", team_email)
+                                            "ORDER BY challenge_number " + orderby, team_email)
 
     return achievements_query.run()
+
 
 def get_highest_achievement(team_email):
     achievements = get_team_achievements(team_email)
@@ -150,7 +151,7 @@ def get_users_team_members(user):
     if (team_member_query.count() == 1) or (team_member_query.count() == 2):
         team_members = team_member_query.run()
         return team_members
-
+ 
 def get_team_members(team_email):
     team_member_query = db.GqlQuery("SELECT * FROM TeamMember " +
                                     "WHERE team_email = :1", team_email)
@@ -282,8 +283,6 @@ class Scoreboard(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('scoreboard.html')
         self.response.write(template.render(template_values))
 
-
-
 class Registration(webapp2.RequestHandler):
 
     def post(self):
@@ -399,6 +398,413 @@ class Registration(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('registration.html')
         self.response.write(template.render(template_values))
 
+class TemkeenGame(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Temkeen Game"
+        challenge_number = 8
+        message = ""
+        
+        clue = "Some of the executives of Temkeen are playing a game on the map of the Saadiyat campus. The game is played on an eight by eight square of the campus and the rules are like this: each player gets a turn to place eight pieces on the board that can attack vertically, horizontally, and diagonally from that space. However, a player&rsquo;s pieces are not allowed to be in spaces that can directly attack each other (i.e. cannot have two pieces in the same row, column, or diagonal).  Then the other player places their eight pieces in spots, maximizing the number of pieces that cannot be attacked by their opponents pieces.  Each player can choose to not put all eight however there are certains ways for the first player to place all eight perfectly so that all spaces are &ldquo;attackable&rdquo; One pieces has been placed for you. Find the rest of the pieces so that they obey the rules, cover all the spaces, and are on squares that contain a purple building (squares with only partial purple count as in D17)"
+
+        attempted_answer = self.request.get_all("number")
+
+        answer = [u'6', u'8', u'10', u'12', u'18', u'56', u'102']
+
+        all_correct = True
+
+        if (len(attempted_answer) != len(answer)):
+            all_correct = False
+        else:
+            for itr in range(len(answer)):
+                if (attempted_answer[itr] != answer[itr]):
+                    all_correct = False
+
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (all_correct):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/apartments"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('temkeen_game.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "Some of the executives of Temkeen are playing a game on the map of the Saadiyat campus. The game is played on an eight by eight square of the campus and the rules are like this: each player gets a turn to place eight pieces on the board that can attack vertically, horizontally, and diagonally from that space. However, a player&rsquo;s pieces are not allowed to be in spaces that can directly attack each other (i.e. cannot have two pieces in the same row, column, or diagonal).  Then the other player places their eight pieces in spots, maximizing the number of pieces that cannot be attacked by their opponents pieces.  Each player can choose to not put all eight however there are certains ways for the first player to place all eight perfectly so that all spaces are &ldquo;attackable&rdquo; One pieces has been placed for you. Find the rest of the pieces so that they obey the rules, cover all the spaces, and are on squares that contain a purple building (squares with only partial purple count as in D17)"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('temkeen_game.html')
+        self.response.write(template.render(template_values))
+
+class CampusWalk(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Long Day on Campus"
+        challenge_number = 7 
+        message = ""
+        
+        clue = "The first day of class is very busy for Ray. Because he&rsquo;s on the track team he starts his day at the gym. Because Ray is trying to find a new life direction by being involved in everything on campus, he needs to travel to all the other 12 building on campus today but end up at the gym. If Ray starts and ends his day at the gym and visits every other building on campus once, how many different ways can he structure his building visits?"
+
+        answer = "479001600"
+        lazy_answer = "12!"
+        attempted_answer = self.request.get('attempted_answer').strip().upper()
+
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (attempted_answer == answer) or (attempted_answer == lazy_answer):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/apartments"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('campus_walk.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "The first day of class is very busy for Ray. Because he&rsquo;s on the track team he starts his day at the gym. Because Ray is trying to find a new life direction by being involved in everything on campus, he needs to travel to all the other 12 building on campus today but end up at the gym. If Ray starts and ends his day at the gym and visits every other building on campus once, how many different ways can he structure his building visits?"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('campus_walk.html')
+        self.response.write(template.render(template_values))
+
+class MeetingParty(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Meet and Greet"
+        challenge_number = 6
+        message = ""
+        
+        clue = "Yesterday there was a party of incoming students where no one had met each other before. Everyone except for one person left the party having met three people, that one person had only met one other person. How many people could possibly have been at this party? Tick off all the possible numbers:"
+
+        attempted_answer = self.request.get_all("number")
+
+        answer = [u'6', u'8', u'10', u'12', u'18', u'56', u'102']
+
+        all_correct = True
+
+        if (len(attempted_answer) != len(answer)):
+            all_correct = False
+        else:
+            for itr in range(len(answer)):
+                if (attempted_answer[itr] != answer[itr]):
+                    all_correct = False
+
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (all_correct):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/apartments"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('meeting_party.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "Yesterday there was a party of incoming students where no one had met each other before. Everyone except for one person left the party having met three people, that one person had only met one other person. How many people could possibly have been at this party? Tick off all the possible numbers:"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('meeting_party.html')
+        self.response.write(template.render(template_values))
+
+class Painters(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Painting Party"
+        challenge_number = 5
+        message = ""
+        
+        clue = "A group of friends are unhappy with the wall color of their new 4 sided common room so they want to paint it. They went to ACE hardware and got gray, blue, yellow, peach, and green paint. They&#39;ve decided that neighboring walls should not be the same color. How many ways can they paint the common room with the colors they have?"
+
+        answer = "260"
+        attempted_answer = self.request.get('attempted_answer').strip().upper()
+
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+
+        if (attempted_answer == answer):
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/apartments"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('painters_riddle.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "A group of friends are unhappy with the wall color of their new 4 sided common room so they want to paint it. They went to ACE hardware and got gray, blue, yellow, peach, and green paint. They&#39;ve decided that neighboring walls should not be the same color. How many ways can they paint the common room with the colors they have?"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('painters_riddle.html')
+        self.response.write(template.render(template_values))
+
+class Posters(webapp2.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        team_name = get_users_team_name(user)
+        challenge_name = "Palms and Posters"
+        challenge_number = 4
+        message = ""
+        
+        clue = "<p> At the Saadiyat campus, Cara, Rumi, Arya, Elena, and Jose have started pinning posters to the palm trees by the student center. The students use three trees in particular and each tree has different colored rocks surrounding it. Each person only pins posters to trees that are surrounded by rocks of their favorite color. For example, before Jessica left to study abroad, she would put posters on trees that had blue rocks around it.</p>\n<p>This semester, the tallest tree is surrounded by pink, teal, and violet rocks. The second tallest tree is surrounded by gray, violet, and white rocks. The shortest tree is surrounded by gray, violet, and green rocks. Trees can also be surrounded by blue, brown, and yellow rocks.</p>\n<p>One person hanging posters likes teal and another person likes brown. Facilities is eager to keep the campus clean and each night they take down the posters from the trees so students try to pin posters as often as possible. Students are also kind enough to support each other&rsquo;s causes so students hang each other&rsquo;s posters making it impossible to differential who hung which poster.</p>\n<p>On the first day of class Arya, Cara, and Elena went to hang some posters. The tallest tree had 1 poster, the second tallest had 1 poster, and the shortest had 2 posters on it. On the second day of class Arya, Cara, and Jose went to hang some posters. The tallest tree had no posters, and the second tallest and shortest had two posters each. On the third day of class Arya, Cara, and Rumi went to hang some posters. The tallest tree had no posters, the second tallest had one poster, and the shortest has two posters. On the fourth day of class Rumi, Elena, and Jose hung some posters. The tallest tree and second tallest trees had one poster each, the shortest tree had no posters. On the fifth day of class, Arya, Elena and Jose hung the last of their posters. The tallest tree had one poster, the second tallest had two posters, and the shortest had one poster.</p>\n<p>According to these events, which color does each person like?</p>"
+
+        answer = "Red"
+        attempted_answer = self.request.get('attempted_answer')
+        attempted_answer = attempted_answer.strip()
+        attempted_answer = attempted_answer.upper()
+
+        cara_attempt = self.request.get('Cara').strip().upper()
+        rumi_attempt = self.request.get('Rumi').strip().upper()
+        arya_attempt = self.request.get('Arya').strip().upper()
+        elena_attempt = self.request.get('Elena').strip().upper()
+        jose_attempt = self.request.get('Jose').strip().upper()
+
+        attempts = [cara_attempt, rumi_attempt, arya_attempt, elena_attempt, jose_attempt]
+        answers = ["GREEN", "BROWN", "GRAY", "TEAL", "WHITE"]
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        all_correct = True
+
+        for itr in range(len(answers)):
+            if attempts[itr] != answers[itr]:
+                all_correct = False
+
+
+        if all_correct:
+            #put logged answer time code here
+            message = "Correct!\n"
+            if not already_achieved(challenge_name, user.email()):
+                new_achievement = Achievement(challenge_name = challenge_name, team_email = user.email(), challenge_url = db.Link("http://saadiyatgames.appspot.com/palmsandposters"), challenge_number = challenge_number)
+                # may have issues with this link being absolute or not
+                new_achievement.put()
+                message += "New achievement added.\n"
+
+            # self.redirect('/the next challenge')
+
+        else:
+            message = "Incorrect answer. Try again."
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name,
+            'message': message
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('posters_riddle.html')
+        self.response.write(template.render(template_values))
+
+    def get(self):
+        user = users.get_current_user()
+        team_name = ""
+
+        if users.get_current_user():
+            log_in_out_url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+            team_name = get_users_team_name(user)
+        else:
+            log_in_out_url = users.create_login_url(self.request.uri)
+            url_linktext = 'Login'
+
+        clue = "<p> At the Saadiyat campus, Cara, Rumi, Arya, Elena, and Jose have started pinning posters to the palm trees by the student center. The students use three trees in particular and each tree has different colored rocks surrounding it. Each person only pins posters to trees that are surrounded by rocks of their favorite color. For example, before Jessica left to study abroad, she would put posters on trees that had blue rocks around it.</p>\n<p>This semester, the tallest tree is surrounded by pink, teal, and violet rocks. The second tallest tree is surrounded by gray, violet, and white rocks. The shortest tree is surrounded by gray, violet, and green rocks. Trees can also be surrounded by blue, brown, and yellow rocks.</p>\n<p>One person hanging posters likes teal and another person likes brown. Facilities is eager to keep the campus clean and each night they take down the posters from the trees so students try to pin posters as often as possible. Students are also kind enough to support each other&rsquo;s causes so students hang each other&rsquo;s posters making it impossible to differential who hung which poster.</p>\n<p>On the first day of class Arya, Cara, and Elena went to hang some posters. The tallest tree had 1 poster, the second tallest had 1 poster, and the shortest had 2 posters on it. On the second day of class Arya, Cara, and Jose went to hang some posters. The tallest tree had no posters, and the second tallest and shortest had two posters each. On the third day of class Arya, Cara, and Rumi went to hang some posters. The tallest tree had no posters, the second tallest had one poster, and the shortest has two posters. On the fourth day of class Rumi, Elena, and Jose hung some posters. The tallest tree and second tallest trees had one poster each, the shortest tree had no posters. On the fifth day of class, Arya, Elena and Jose hung the last of their posters. The tallest tree had one poster, the second tallest had two posters, and the shortest had one poster.</p>\n<p>According to these events, which color does each person like?</p>"
+
+        template_values = { 
+            'user' : user,
+            'url': log_in_out_url,
+            'url_linktext': url_linktext,
+            'clue_text': clue,
+            'team_name': team_name
+        }   
+    
+        template = JINJA_ENVIRONMENT.get_template('posters_riddle.html')
+        self.response.write(template.render(template_values))
+
 class Apartments(webapp2.RequestHandler):
 
     def post(self):
@@ -408,7 +814,7 @@ class Apartments(webapp2.RequestHandler):
         challenge_number = 3
         message = ""
         
-        clue = "Seven students have been caught cheating on a test and the administration is cracking down to see if they all cheated with each other and if perhaps a cheating ring is starting at NYUAD. During the interrogations, no one has said exactly who they&rsquo;ve cheated with but they have said how many other people they&rsquo;ve cheated with.\n Janet has admitted to cheating with all six other students, Bobby has admitted to cheating with five of the other students, Nir has admitted to cheating with four, Dias with three, Celine with two, Farhat with two, and Gustave with one of the other students.\n No student would say they&rsquo;re cheating with more people than they have been, but a few may say they&rsquo;ve cheated with fewer people than they have been.\n An anonymous tip says that Farhat is telling the truth and there is only one liar. Who is the liar if this is the case?"
+        clue = "In one of the Saadiyat apartments, the contractors had an option of how to build the double and single rooms. The requirements were that on one side of a hallway there needed to be six bedrooms but the builders could make them all doubles with two bedrooms in one room, all singles with one bedroom per room, or a mix of both. How many different ways could they have modeled the six bedrooms?"
 
         answer = "13"
         attempted_answer = self.request.get('attempted_answer')
@@ -431,7 +837,6 @@ class Apartments(webapp2.RequestHandler):
                 # may have issues with this link being absolute or not
                 new_achievement.put()
                 message += "New achievement added.\n"
-
 
             # self.redirect('/the next challenge')
 
@@ -706,7 +1111,7 @@ class TeamHome(webapp2.RequestHandler):
                 team_members = get_users_team_members(user)
                 for member in team_members:
                     team_member_names.append(member.get_member_name())
-                team_achievements = get_team_achievements(user.email())
+                team_achievements = get_team_achievements(user.email(), "ASC")
 
 
         else:
@@ -1049,6 +1454,13 @@ application = webapp2.WSGIApplication([
     (r'/liarliar', LiarsRiddle),
     # Week 2
     (r'/apartments', Apartments),
+    (r'/palmsandposters', Posters),
+    # Week 3
+    (r'/painters', Painters),
+    (r'/meetandgreet', MeetingParty),
+    # Week 4
+    (r'/campuswalk', CampusWalk),
+    (r'/temkeen', TemkeenGame),
     (r'/user/', UserHome),
     (r'/blog/(.*)/(.*)', BlogHome),
     (r'/post/(.*)/(.*)/(.*)', BlogpostPage),
